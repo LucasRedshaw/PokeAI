@@ -46,7 +46,7 @@ class GameBoyEnv(gym.Env):
         observation = np.array(self.pyboy.screen.image)[:, :, :3]
         observation_hash = self.hash_observation(observation)
 
-        reward = 0
+        reward = -0.1
         threshold = 0.6  # Similarity threshold
 
         similar_observation = any(
