@@ -14,7 +14,7 @@ from datetime import datetime
 # Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
     # Initialization method
-    def __init__(self, game_rom, window='SDL2'):
+    def __init__(self, game_rom, window='null'):
         super(GameBoyEnv, self).__init__()  # Initialize the superclass
         # Initialize PyBoy with a ROM file and set the window type
         self.pyboy = PyBoy(game_rom, window=window)
@@ -128,29 +128,29 @@ class GameBoyEnv(gym.Env):
 
 
 # Define a function to create a new instance of the environment
-# def make_env():
-#     return GameBoyEnv('PokemonRed.gb')
+def make_env():
+    return GameBoyEnv('PokemonRed.gb')
 
 
-# env = DummyVecEnv([make_env for _ in range(4)])
+env = DummyVecEnv([make_env for _ in range(4)])
 
-# # #model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
-# model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
+model = PPO.load("ppo_pokemon39_last_good", env=env, verbose=1, n_steps=2048)
+#model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
 
-# learn_steps = 40
+learn_steps = 40
 
-# for i in range(learn_steps):
-#      print(f"Starting iteration {i + 1}/{learn_steps}")
-#      current_time = datetime.now()
-#      print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
+for i in range(learn_steps):
+     print(f"Starting iteration {i + 1}/{learn_steps}")
+     current_time = datetime.now()
+     print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
 
 
-#     # Learn for the specified number of timesteps
-#      model.learn(total_timesteps=2048)
-#      print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
-#      model.save("ppo_pokemon" + str(i))
+    # Learn for the specified number of timesteps
+     model.learn(total_timesteps=2048)
+     print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
+     model.save("ppo_pokemon" + str(i))
 
-# model.save("ppo_pokemon")
+model.save("ppo_pokemon")
 
 
 # # To continue training
