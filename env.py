@@ -8,6 +8,7 @@ import hashlib
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.vec_env import DummyVecEnv
+from datetime import datetime
 
 
 # Define a custom Gym environment for the Game Boy using PyBoy
@@ -114,36 +115,40 @@ class GameBoyEnv(gym.Env):
 
 
 # Define a function to create a new instance of the environment
-def make_env():
-    return GameBoyEnv('PokemonRed.gb')
+# def make_env():
+#     return GameBoyEnv('PokemonRed.gb')
 
 
-env = DummyVecEnv([make_env for _ in range(8)])
+# env = DummyVecEnv([make_env for _ in range(4)])
 
-#model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
-model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
+# #model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
+# model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
 
-learn_steps = 40
+# learn_steps = 40
 
-for i in range(learn_steps):
-    print(f"Starting iteration {i + 1}/{learn_steps}")
-    
-    # Learn for the specified number of timesteps
-    model.learn(total_timesteps=2048)
-
-model.save("ppo_pokemon")
+# for i in range(learn_steps):
+#     print(f"Starting iteration {i + 1}/{learn_steps}")
+#     current_time = datetime.now()
+#     print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
 
 
-# To continue training
-# model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
-# model.learn(total_timesteps=2048)
+#     # Learn for the specified number of timesteps
+#     model.learn(total_timesteps=2048)
+#     print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
 
-# Test the trained model
-# observation = env.reset()
-# for _ in range(10000):
-#     action, _states = model.predict(observation, deterministic=True)
-#     observation, reward, done, truncated, info = env.step(action)
-#     if done:
-#         observation = env.reset()
+# model.save("ppo_pokemon")
 
-env.close()
+
+# # To continue training
+# # model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
+# # model.learn(total_timesteps=2048)
+
+# # Test the trained model
+# # observation = env.reset()
+# # for _ in range(10000):
+# #     action, _states = model.predict(observation, deterministic=True)
+# #     observation, reward, done, truncated, info = env.step(action)
+# #     if done:
+# #         observation = env.reset()
+
+# env.close()
