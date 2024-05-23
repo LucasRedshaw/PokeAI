@@ -14,7 +14,7 @@ from datetime import datetime
 # Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
     # Initialization method
-    def __init__(self, game_rom, window='headless'):
+    def __init__(self, game_rom, window='SDL2'):
         super(GameBoyEnv, self).__init__()  # Initialize the superclass
         # Initialize PyBoy with a ROM file and set the window type
         self.pyboy = PyBoy(game_rom, window=window)
@@ -23,7 +23,8 @@ class GameBoyEnv(gym.Env):
         self.action_space = spaces.Discrete(6)
         # Define the observation space - Game Boy screen size 160x144, RGB
         self.observation_space = spaces.Box(low=0, high=255, shape=(144, 160, 3), dtype='uint8')
-        self.seen_observations = {}
+        self.seen_coords = set()
+        self.seen_maps = set()
 
 
     def hash_observation(self, observation):
@@ -44,28 +45,40 @@ class GameBoyEnv(gym.Env):
     def step(self, action):
         self.take_action(action)
         self.pyboy.tick(75)
+
         observation = np.array(self.pyboy.screen.image)[:, :, :3]
-        observation_hash = self.hash_observation(observation)
 
-        reward = -0.1
-        threshold = 0.6  # Similarity threshold
+        reward =  0  # Default reward for non-unique state
 
-        similar_observation = any(
-            self.similarity_score(observation_hash, seen_hash) >= threshold
-            for seen_hash in self.seen_observations
-        )
+        # Retrieve current position and map data
+        mapid = self.pyboy.memory[0xD35E]
+        xcoord = self.pyboy.memory[0xD362]
+        ycoord = self.pyboy.memory[0xD361]
 
-        if not similar_observation:
-            reward = 1
-            self.seen_observations[observation_hash] = True
+        # Unique key based on map, x, and y coordinates
+        current_coords = (mapid, xcoord, ycoord)
 
+        # Check if the state has been seen before and update the reward if it's new
+        if current_coords not in self.seen_coords:
+            reward = 1  # Reward for discovering a new state
+            self.seen_coords.add(current_coords)  # Mark this state as seen
+
+        if mapid not in self.seen_maps:
+            reward = 50
+            if mapid == 1:
+                print("Viridian City")
+            self.seen_maps.add(mapid)
+
+        #print(f"Map ID: {mapid}, X Coord: {xcoord}, Y Coord: {ycoord}")
         #print(reward)
-
         done = False
         truncated = False
         info = {}
+        #print(reward)
 
         return observation, reward, done, truncated, info
+    
+    
     # Reset function to start a new episode
     def reset(self, seed=None, options=None):
         # Seed the random number generator for reproducibility
@@ -79,7 +92,7 @@ class GameBoyEnv(gym.Env):
         observation = np.array(self.pyboy.screen.image)
         observation = observation[:, :, :3]
         info = {}
-        self.seen_observations = {}
+        self.seen_coords = set()
         print("reset")
         return observation, info
 
@@ -121,20 +134,21 @@ class GameBoyEnv(gym.Env):
 
 # env = DummyVecEnv([make_env for _ in range(4)])
 
-# #model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
+# # #model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
 # model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
 
 # learn_steps = 40
 
 # for i in range(learn_steps):
-#     print(f"Starting iteration {i + 1}/{learn_steps}")
-#     current_time = datetime.now()
-#     print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
+#      print(f"Starting iteration {i + 1}/{learn_steps}")
+#      current_time = datetime.now()
+#      print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
 
 
 #     # Learn for the specified number of timesteps
-#     model.learn(total_timesteps=2048)
-#     print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
+#      model.learn(total_timesteps=2048)
+#      print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
+#      model.save("ppo_pokemon" + str(i))
 
 # model.save("ppo_pokemon")
 
