@@ -26,22 +26,6 @@ class GameBoyEnv(gym.Env):
         self.seen_coords = set()
         self.seen_maps = set()
 
-
-    def hash_observation(self, observation):
-        # Convert the observation (RGB numpy array) to a hashable format (e.g., bytes)
-        observation_bytes = observation.tobytes()
-        return hashlib.md5(observation_bytes).hexdigest()
-
-    # Step function to process actions and return results
-    def hamming_distance(self, hash1, hash2):
-        b1 = bin(int(hash1, 16))[2:].zfill(128)
-        b2 = bin(int(hash2, 16))[2:].zfill(128)
-        return sum(c1 != c2 for c1, c2 in zip(b1, b2))
-
-    def similarity_score(self, hash1, hash2):
-        distance = self.hamming_distance(hash1, hash2)
-        return 1 - (distance / 128)
-
     def step(self, action):
         self.take_action(action)
         self.pyboy.tick(75)
@@ -122,47 +106,3 @@ class GameBoyEnv(gym.Env):
         final_image.save("final_observation.png")
         # Stop the emulator and free resources
         self.pyboy.stop()
-
-
-
-
-
-# Define a function to create a new instance of the environment
-def make_env():
-    return GameBoyEnv('PokemonRed.gb')
-
-
-env = DummyVecEnv([make_env for _ in range(4)])
-
-model = PPO.load("ppo_pokemon39_last_good", env=env, verbose=1, n_steps=2048)
-#model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
-
-learn_steps = 40
-
-for i in range(learn_steps):
-     print(f"Starting iteration {i + 1}/{learn_steps}")
-     current_time = datetime.now()
-     print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
-
-
-    # Learn for the specified number of timesteps
-     model.learn(total_timesteps=2048)
-     print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
-     model.save("ppo_pokemon" + str(i))
-
-model.save("ppo_pokemon")
-
-
-# # To continue training
-# # model = PPO.load("ppo_pokemon", env=env, verbose=1, n_steps=2048)
-# # model.learn(total_timesteps=2048)
-
-# # Test the trained model
-# # observation = env.reset()
-# # for _ in range(10000):
-# #     action, _states = model.predict(observation, deterministic=True)
-# #     observation, reward, done, truncated, info = env.step(action)
-# #     if done:
-# #         observation = env.reset()
-
-# env.close()
