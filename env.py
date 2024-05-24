@@ -9,7 +9,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.vec_env import DummyVecEnv
 from datetime import datetime
-
+import dill
 
 # Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
@@ -25,10 +25,14 @@ class GameBoyEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(144, 160, 3), dtype='uint8')
         self.seen_coords = set()
         self.seen_maps = set()
+        self.max_steps = 8192
+        self.current_step = 0
 
     def step(self, action):
         self.take_action(action)
-        self.pyboy.tick(75)
+        self.current_step += 1
+        print(self.current_step)
+        self.pyboy.tick(60)
 
         observation = np.array(self.pyboy.screen.image)[:, :, :3]
 
@@ -48,14 +52,20 @@ class GameBoyEnv(gym.Env):
             self.seen_coords.add(current_coords)  # Mark this state as seen
 
         if mapid not in self.seen_maps:
-            reward = 50
+            reward = 10
             if mapid == 1:
                 print("Viridian City")
-            self.seen_maps.add(mapid)
+                reward = 50
+            if mapid == 12:
+                print("Route 1")
+                reward = 25
 
         #print(f"Map ID: {mapid}, X Coord: {xcoord}, Y Coord: {ycoord}")
         #print(reward)
-        done = False
+        if self.current_step >= self.max_steps:
+            done = True
+        else:
+            done = False
         truncated = False
         info = {}
         #print(reward)
@@ -77,7 +87,9 @@ class GameBoyEnv(gym.Env):
         observation = observation[:, :, :3]
         info = {}
         self.seen_coords = set()
-        print("reset")
+        self.seen_maps = set()
+        self.current_step = 0
+        print("Reset Environment")
         return observation, info
 
     def take_action(self, action):
@@ -106,3 +118,17 @@ class GameBoyEnv(gym.Env):
         final_image.save("final_observation.png")
         # Stop the emulator and free resources
         self.pyboy.stop()
+
+    # def __getstate__(self):
+    #     state = self.__dict__.copy()
+    #     # Remove the PyBoy instance from the state
+    #     del state['pyboy']
+    #     return state
+
+    # def __setstate__(self, state):
+    #     self.__dict__.update(state)
+    #     # Re-initialize the PyBoy instance
+    #     self.pyboy = PyBoy('PokemonRed.gb', window='SDL2')
+    #     self.pyboy.set_emulation_speed(0)
+
+

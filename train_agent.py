@@ -11,25 +11,21 @@ from datetime import datetime
 
 # Define a function to create a new instance of the environment
 def make_env():
-    return GameBoyEnv('PokemonRed.gb', window='null')
+    return GameBoyEnv('PokemonRed.gb', window='headless')
 
 
-env = DummyVecEnv([make_env for _ in range(4)])
+env = DummyVecEnv([make_env for _ in range(1)])
 
-model = PPO.load("ppo_pokemon39_last_good", env=env, verbose=1, n_steps=2048)
+
+
+#model = PPO.load("ppo_pokemon39_last_good", env=env, verbose=1, n_steps=2048)
 #model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
-
-learn_steps = 40
-
-for i in range(learn_steps):
-     print(f"Starting iteration {i + 1}/{learn_steps}")
-     current_time = datetime.now()
-     print("Starting " + str(i) +":", current_time.strftime("%H:%M:%S"))
+model = PPO('CnnPolicy', env, verbose=1, n_steps=8192)
 
 
-    # Learn for the specified number of timesteps
-     model.learn(total_timesteps=2048)
-     print("Finished " + str(i) +":", current_time.strftime("%H:%M:%S"))
-     model.save("ppo_pokemon" + str(i))
 
-model.save("ppo_pokemon")
+checkpoint_callback = CheckpointCallback(save_freq=8192, save_path='test', name_prefix='poke')
+
+model.learn(total_timesteps=8192*5000, callback=checkpoint_callback)
+
+model.save("ppo_pokemon_fin")
