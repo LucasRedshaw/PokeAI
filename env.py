@@ -9,73 +9,101 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.vec_env import DummyVecEnv
 from datetime import datetime
-import dill
+import time
 
 # Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
     # Initialization method
     def __init__(self, game_rom, window='null'):
-        super(GameBoyEnv, self).__init__()  # Initialize the superclass
-        # Initialize PyBoy with a ROM file and set the window type
+        super(GameBoyEnv, self).__init__()
         self.pyboy = PyBoy(game_rom, window=window)
         self.pyboy.set_emulation_speed(0)
+        
         # Define the action space - Game Boy has 8 buttons
         self.action_space = spaces.Discrete(6)
         # Define the observation space - Game Boy screen size 160x144, RGB
         self.observation_space = spaces.Box(low=0, high=255, shape=(144, 160, 3), dtype='uint8')
         self.seen_coords = set()
         self.seen_maps = set()
-        self.max_steps = 8192
+        self.seen_maps.add(40)
+        self.max_steps = 2048
         self.current_step = 0
+        self.rewardtotal = 0
+        self.pokelvlsumtrack = 6
 
     def step(self, action):
+
         self.take_action(action)
         self.current_step += 1
-        print(self.current_step)
         self.pyboy.tick(60)
 
         observation = np.array(self.pyboy.screen.image)[:, :, :3]
 
-        reward =  0  # Default reward for non-unique state
-
+        reward =  0
+        coordreward = 0
+        mapidreward = 0
+        levelupreward = 0
+    
         # Retrieve current position and map data
         mapid = self.pyboy.memory[0xD35E]
         xcoord = self.pyboy.memory[0xD362]
         ycoord = self.pyboy.memory[0xD361]
+
+        poke1lvl = self.pyboy.memory[0xD18C]
+        poke2lvl = self.pyboy.memory[0xD1B8]
+        poke3lvl = self.pyboy.memory[0xD1E4]
+        poke4lvl = self.pyboy.memory[0xD210]
+        poke5lvl = self.pyboy.memory[0xD23C]
+        poke6lvl = self.pyboy.memory[0xD268]
+
+        pokelvlsum = poke1lvl + poke2lvl + poke3lvl + poke4lvl + poke5lvl + poke6lvl
 
         # Unique key based on map, x, and y coordinates
         current_coords = (mapid, xcoord, ycoord)
 
         # Check if the state has been seen before and update the reward if it's new
         if current_coords not in self.seen_coords:
-            reward = 1  # Reward for discovering a new state
+            coordreward = 1  # Reward for discovering a new state
             self.seen_coords.add(current_coords)  # Mark this state as seen
 
         if mapid not in self.seen_maps:
-            reward = 10
+            mapidreward = 3
             if mapid == 1:
                 print("Viridian City")
-                reward = 50
             if mapid == 12:
                 print("Route 1")
-                reward = 25
+            if mapid == 51:
+                print("Viridian Forest")
+            if mapid == 13:
+                print("Route 2")
 
-        #print(f"Map ID: {mapid}, X Coord: {xcoord}, Y Coord: {ycoord}")
-        #print(reward)
+            self.seen_maps.add(mapid)
+
+        if pokelvlsum > self.pokelvlsumtrack:
+            levelupreward = 7
+            print("Caught or Levelled")
+            self.pokelvlsumtrack = pokelvlsum
+
+        reward = coordreward + mapidreward + levelupreward
+        self.rewardtotal += reward 
+        
         if self.current_step >= self.max_steps:
+            print(str(self.rewardtotal))
             done = True
         else:
             done = False
         truncated = False
         info = {}
+
         #print(reward)
 
         return observation, reward, done, truncated, info
+
     
     
     # Reset function to start a new episode
     def reset(self, seed=None, options=None):
-        # Seed the random number generator for reproducibility
+
         super().reset(seed=seed)
         np.random.seed(seed)
         with open("state_file.state", "rb") as f:
@@ -88,9 +116,15 @@ class GameBoyEnv(gym.Env):
         info = {}
         self.seen_coords = set()
         self.seen_maps = set()
+        self.seen_maps.add(40)
         self.current_step = 0
-        print("Reset Environment")
+        self.rewardtotal = 0
+        self.pokelvlsumtrack = 6
+
+        #print("Reset Environment")
         return observation, info
+
+        
 
     def take_action(self, action):
     # Map action to PyBoy controls
@@ -113,22 +147,8 @@ class GameBoyEnv(gym.Env):
 
     # Close function to clean up resources
     def close(self):
-        # Stop the emulator and free resources
-        final_image = self.pyboy.screen.image
-        final_image.save("final_observation.png")
-        # Stop the emulator and free resources
         self.pyboy.stop()
 
-    # def __getstate__(self):
-    #     state = self.__dict__.copy()
-    #     # Remove the PyBoy instance from the state
-    #     del state['pyboy']
-    #     return state
-
-    # def __setstate__(self, state):
-    #     self.__dict__.update(state)
-    #     # Re-initialize the PyBoy instance
-    #     self.pyboy = PyBoy('PokemonRed.gb', window='SDL2')
-    #     self.pyboy.set_emulation_speed(0)
+    
 
 
