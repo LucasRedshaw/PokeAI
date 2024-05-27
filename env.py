@@ -10,6 +10,10 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.vec_env import DummyVecEnv
 from datetime import datetime
 import time
+import datetime
+import csv
+import heatmap
+import os
 
 # Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
@@ -26,10 +30,11 @@ class GameBoyEnv(gym.Env):
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
-        self.max_steps = 4096
+        self.max_steps = 2048
         self.current_step = 0
         self.rewardtotal = 0
         self.pokelvlsumtrack = 6
+        open('player_coordinates.csv', mode='w').close()
 
     def step(self, action):
 
@@ -60,7 +65,7 @@ class GameBoyEnv(gym.Env):
 
         # Unique key based on map, x, and y coordinates
         current_coords = (mapid, xcoord, ycoord)
-
+        #print(current_coords)
         # Check if the state has been seen before and update the reward if it's new
         if current_coords not in self.seen_coords:
             coordreward = 0.5  # Reward for discovering a new state
@@ -98,6 +103,9 @@ class GameBoyEnv(gym.Env):
         info = {}
 
         #print(reward)
+        with open('player_coordinates.csv', mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.current_step, mapid, xcoord, ycoord])
 
         return observation, reward, done, truncated, info
 
@@ -123,7 +131,28 @@ class GameBoyEnv(gym.Env):
         self.rewardtotal = 0
         self.pokelvlsumtrack = 6
 
+        image_path = "amap.png"
+        csv_path = "player_coordinates.csv"
+        map_ids = [0, 12]  # Add other map IDs here as needed
+
+        # Read coordinates
+        coordinates = heatmap.read_coordinates(csv_path, map_ids)
+
+        # Generate current date and time string
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+
+        # Define the output path with the date and time
+        output_path = f"heatmaps\heatmap_{current_time}.png"
+
+        # Create the heatmap
+        if not os.path.exists(output_path):
+            # Create the heatmap if it doesn't exist
+            heatmap.create_heatmap(image_path, coordinates, output_path, heatmap.base_coordinates)
+
+        open('player_coordinates.csv', mode='w').close()
+
         #print("Reset Environment")
+
         return observation, info
 
         
