@@ -29,29 +29,30 @@ class StreamWrapper(gym.Wrapper):
             raise Exception("Could not find emulator!")
 
     def step(self, action):
-
-        x_pos = self.emulator.get_memory_value(X_POS_ADDRESS)
-        y_pos = self.emulator.get_memory_value(Y_POS_ADDRESS)
-        map_n = self.emulator.get_memory_value(MAP_N_ADDRESS)
+        x_pos = self.emulator.memory[X_POS_ADDRESS]
+        y_pos = self.emulator.memory[Y_POS_ADDRESS]
+        map_n = self.emulator.memory[MAP_N_ADDRESS]
         self.coord_list.append([x_pos, y_pos, map_n])
 
         if self.steam_step_counter >= self.upload_interval:
-            self.loop.run_until_complete(
-                self.broadcast_ws_message(
-                    json.dumps(
-                        {
-                          "metadata": self.stream_metadata,
-                          "coords": self.coord_list
-                        }
-                    )
-                )
-            )
+            try:
+                metadata_serializable = {k: v for k, v in self.stream_metadata.items() if isinstance(v, (str, int, float, list, dict))}
+                message = json.dumps({
+                    "metadata": metadata_serializable,
+                    "coords": self.coord_list
+                })
+                self.loop.run_until_complete(self.broadcast_ws_message(message))
+            except TypeError as e:
+                print(f"Serialization error: {e}")
+            
             self.steam_step_counter = 0
             self.coord_list = []
 
         self.steam_step_counter += 1
+        print("streamstep")
 
         return self.env.step(action)
+
 
     async def broadcast_ws_message(self, message):
         if self.websocket is None:

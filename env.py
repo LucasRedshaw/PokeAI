@@ -15,26 +15,23 @@ import csv
 import heatmap
 import os
 
-# Define a custom Gym environment for the Game Boy using PyBoy
 class GameBoyEnv(gym.Env):
-    # Initialization method
     def __init__(self, game_rom, window='null'):
         super(GameBoyEnv, self).__init__()
         self.pyboy = PyBoy(game_rom, window=window)
         self.pyboy.set_emulation_speed(0)
         
-        # Define the action space - Game Boy has 8 buttons
         self.action_space = spaces.Discrete(6)
-        # Define the observation space - Game Boy screen size 160x144, RGB
-        self.observation_space = spaces.Box(low=0, high=255, shape=(144, 160, 3), dtype='uint8')
+        self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype='uint8')
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
-        self.max_steps = 2048
+        self.max_steps = 16000
         self.current_step = 0
         self.rewardtotal = 0
         self.pokelvlsumtrack = 6
-        open('player_coordinates.csv', mode='w').close()
+        #open('player_coordinates.csv', mode='w').close()
+
 
     def step(self, action):
 
@@ -42,14 +39,14 @@ class GameBoyEnv(gym.Env):
         self.current_step += 1
         self.pyboy.tick(60)
 
-        observation = np.array(self.pyboy.screen.image)[:, :, :3]
+        observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
+
 
         reward =  0
         coordreward = 0
         mapidreward = 0
         levelupreward = 0
     
-        # Retrieve current position and map data
         mapid = self.pyboy.memory[0xD35E]
         xcoord = self.pyboy.memory[0xD362]
         ycoord = self.pyboy.memory[0xD361]
@@ -63,12 +60,11 @@ class GameBoyEnv(gym.Env):
 
         pokelvlsum = poke1lvl + poke2lvl + poke3lvl + poke4lvl + poke5lvl + poke6lvl
 
-        # Unique key based on map, x, and y coordinates
         current_coords = (mapid, xcoord, ycoord)
         #print(current_coords)
-        # Check if the state has been seen before and update the reward if it's new
+
         if current_coords not in self.seen_coords:
-            coordreward = 0.5  # Reward for discovering a new state
+            coordreward = 1  # Reward for discovering a new state
             self.seen_coords.add(current_coords)  # Mark this state as seen
 
         if mapid not in self.seen_maps:
@@ -99,19 +95,19 @@ class GameBoyEnv(gym.Env):
             done = True
         else:
             done = False
+
         truncated = False
         info = {}
 
         #print(reward)
-        with open('player_coordinates.csv', mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([self.current_step, mapid, xcoord, ycoord])
+        # with open('player_coordinates.csv', mode='a', newline='') as file:
+        #     writer = csv.writer(file)
+        #     writer.writerow([self.current_step, mapid, xcoord, ycoord])
 
         return observation, reward, done, truncated, info
 
     
     
-    # Reset function to start a new episode
     def reset(self, seed=None, options=None):
 
         super().reset(seed=seed)
@@ -119,10 +115,8 @@ class GameBoyEnv(gym.Env):
         with open("state_file.state", "rb") as f:
             self.pyboy.load_state(f)
 
-        # Get the current screen image as an RGB numpy array
+        observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
 
-        observation = np.array(self.pyboy.screen.image)
-        observation = observation[:, :, :3]
         info = {}
         self.seen_coords = set()
         self.seen_maps = set()
@@ -133,23 +127,22 @@ class GameBoyEnv(gym.Env):
 
         image_path = "amap.png"
         csv_path = "player_coordinates.csv"
-        map_ids = [0, 12]  # Add other map IDs here as needed
+        map_ids = [0, 12]  
 
         # Read coordinates
-        coordinates = heatmap.read_coordinates(csv_path, map_ids)
+        #coordinates = heatmap.read_coordinates(csv_path, map_ids)
 
-        # Generate current date and time string
+
         current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
 
-        # Define the output path with the date and time
-        output_path = f"heatmaps\heatmap_{current_time}.png"
+
+        #output_path = f"heatmaps\heatmap_{current_time}.png"
 
         # Create the heatmap
-        if not os.path.exists(output_path):
-            # Create the heatmap if it doesn't exist
-            heatmap.create_heatmap(image_path, coordinates, output_path, heatmap.base_coordinates)
+        #if not os.path.exists(output_path):
+         #   heatmap.create_heatmap(image_path, coordinates, output_path, heatmap.base_coordinates)
 
-        open('player_coordinates.csv', mode='w').close()
+        #open('player_coordinates.csv', mode='w').close()
 
         #print("Reset Environment")
 
@@ -158,7 +151,6 @@ class GameBoyEnv(gym.Env):
         
 
     def take_action(self, action):
-    # Map action to PyBoy controls
         if action == 0:
             self.pyboy.button('a',3)
         elif action == 1:
@@ -176,7 +168,6 @@ class GameBoyEnv(gym.Env):
         elif action == 7:
             self.pyboy.button('select',3)
 
-    # Close function to clean up resources
     def close(self):
         self.pyboy.stop()
 
