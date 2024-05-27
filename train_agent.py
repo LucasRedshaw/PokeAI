@@ -34,18 +34,18 @@ if __name__ == '__main__':
             if reload:
                 print(f"loading: {reload}")
                 env = SubprocVecEnv([make_env for _ in range(8)])
-                checkpoint_callback = CheckpointCallback(save_freq=2048, save_path='test', name_prefix=str(attempt))
+                checkpoint_callback = CheckpointCallback(save_freq=4096, save_path='test', name_prefix=str(attempt))
                 model = PPO.load(reload, env=env, verbose=1)
-                model.learn(total_timesteps=2048 * 5000, callback=checkpoint_callback)
+                model.learn(total_timesteps=4096 * 5000, callback=checkpoint_callback)
                 model.save("ppo_pokemon_fin")
                 env.close()  # Ensure the environment is closed gracefully
                 break
             else:
                 print("No checkpoint found, starting new training session.")
                 env = SubprocVecEnv([make_env for _ in range(8)])
-                checkpoint_callback = CheckpointCallback(save_freq=2048, save_path='test', name_prefix=str(attempt))
+                checkpoint_callback = CheckpointCallback(save_freq=4096, save_path='test', name_prefix=str(attempt))
                 model = PPO('MlpPolicy', env, verbose=1)
-                model.learn(total_timesteps=2048 * 5000, callback=checkpoint_callback)
+                model.learn(total_timesteps=4096 * 5000, callback=checkpoint_callback)
                 model.save("ppo_pokemon_fin")
                 env.close()  # Ensure the environment is closed gracefully
                 break

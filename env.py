@@ -26,7 +26,7 @@ class GameBoyEnv(gym.Env):
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
-        self.max_steps = 2048
+        self.max_steps = 4096
         self.current_step = 0
         self.rewardtotal = 0
         self.pokelvlsumtrack = 6
@@ -63,7 +63,7 @@ class GameBoyEnv(gym.Env):
 
         # Check if the state has been seen before and update the reward if it's new
         if current_coords not in self.seen_coords:
-            coordreward = 1  # Reward for discovering a new state
+            coordreward = 0.5  # Reward for discovering a new state
             self.seen_coords.add(current_coords)  # Mark this state as seen
 
         if mapid not in self.seen_maps:
@@ -76,11 +76,13 @@ class GameBoyEnv(gym.Env):
                 print("Viridian Forest")
             if mapid == 13:
                 print("Route 2")
+            if mapid == 2:
+                print("Pewter City")
 
             self.seen_maps.add(mapid)
 
         if pokelvlsum > self.pokelvlsumtrack:
-            levelupreward = 7
+            levelupreward = 8
             print("Caught or Levelled")
             self.pokelvlsumtrack = pokelvlsum
 

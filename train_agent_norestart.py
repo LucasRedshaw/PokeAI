@@ -15,11 +15,11 @@ def make_env():
 
 if __name__ == '__main__':
     env = DummyVecEnv([make_env for _ in range(8)])
-    model = PPO.load("test\poke_851968_steps.zip", env=env, verbose=1, n_steps=2048)
-    #model = PPO('CnnPolicy', env, verbose=1, n_steps=2048)
+    #model = PPO.load("test\poke_851968_steps.zip", env=env, verbose=1, n_steps=2048)
+    model = PPO('CnnPolicy', env, verbose=1, n_steps=4096)
 
-    checkpoint_callback = CheckpointCallback(save_freq=2048, save_path='test', name_prefix='poke')
+    checkpoint_callback = CheckpointCallback(save_freq=4096, save_path='test', name_prefix='poke')
 
-    model.learn(total_timesteps=2048*500, callback=checkpoint_callback)
+    model.learn(total_timesteps=4096*500, callback=checkpoint_callback)
 
     model.save("ppo_pokemon_fin")

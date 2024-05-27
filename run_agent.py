@@ -12,11 +12,10 @@ def make_env(rank, seed=0):
 
 if __name__ == '__main__':
     env = make_env(0)() 
-    file_name = 'test\poke_851968_steps.zip'
+    file_name = 'evening25-05-24.zip'
     print('\nloading checkpoint')
     model = PPO.load(file_name, env=env)
     obs, info = env.reset()
     while True:
         action, _states = model.predict(obs, deterministic=False)
         obs, rewards, terminated, truncated, info = env.step(action)
-    env.close()
