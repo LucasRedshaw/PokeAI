@@ -33,7 +33,7 @@ if __name__ == '__main__':
     env_fns = [make_env(i) for i in range(8)]
     env = SubprocVecEnv(env_fns)
     #model = PPO.load("test\poke_1024000_steps.zip", env=env, verbose=1, n_steps=16000)
-    model = PPO('CnnPolicy', env, verbose=1, n_steps=8000, batch_size=128, n_epochs=3, gamma=0.998)
-    checkpoint_callback = CheckpointCallback(save_freq=8000, save_path='checkpoints', name_prefix='poke')
+    model = PPO('CnnPolicy', env, verbose=1, n_steps=12000, batch_size=128, n_epochs=3, gamma=0.998)
+    checkpoint_callback = CheckpointCallback(save_freq=12000, save_path='checkpoints', name_prefix='poke')
     model.learn(total_timesteps=100000000, callback=checkpoint_callback)
     model.save("ppo_pokemon_fin")
