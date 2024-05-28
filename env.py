@@ -64,11 +64,12 @@ class GameBoyEnv(gym.Env):
         #print(current_coords)
 
         if current_coords not in self.seen_coords:
-            coordreward = 1  # Reward for discovering a new state
+              # Reward for discovering a new state
             self.seen_coords.add(current_coords)  # Mark this state as seen
+            coordreward = (0.02 * len(self.seen_coords))
 
         if mapid not in self.seen_maps:
-            mapidreward = 3
+            mapidreward = 0
             if mapid == 1:
                 print("Viridian City")
             if mapid == 12:

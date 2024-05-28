@@ -49,7 +49,6 @@ class StreamWrapper(gym.Wrapper):
             self.coord_list = []
 
         self.steam_step_counter += 1
-        print("streamstep")
 
         return self.env.step(action)
 

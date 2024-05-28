@@ -12,7 +12,7 @@ def make_env(rank, seed=0):
 
 if __name__ == '__main__':
     env = make_env(0)() 
-    file_name = 'evening25-05-24.zip'
+    file_name = 'test\poke_2944000_steps.zip'
     print('\nloading checkpoint')
     model = PPO.load(file_name, env=env)
     obs, info = env.reset()
