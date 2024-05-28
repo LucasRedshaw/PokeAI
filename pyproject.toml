@@ -14,13 +14,12 @@ classifiers = [
 dependencies = [
     "Pillow==9.5.0",
     "gymnasium==0.28.1",
-    "pyboy",
+    "pyboy==2.0.3",
     "wandb",
     "websockets",
-    "stable-baselines3==2.0.0",
-    "tensor",
-    "tensorflow",
-    "tensorrt",
+    "pufferlib[cleanrl]>=0.7.3",
+    "pettingzoo",
+    "gym==0.23",
 ]
 [tool.setuptools.packages.find]
 where = ["."]
