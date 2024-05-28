@@ -1,4 +1,6 @@
 from os.path import exists
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 from pathlib import Path
 import uuid
 from env import GameBoyEnv
@@ -12,7 +14,7 @@ from helpers.stream import StreamWrapper
 
 def make_env(rank, seed=0):
     def _init():
-        env = GameBoyEnv('PokemonRed.gb', window='null')
+        env = GameBoyEnv('rom\\PokemonRed.gb', window='null')
         env.reset(seed=(seed + rank))
         env = StreamWrapper(
             env, 
@@ -32,6 +34,6 @@ if __name__ == '__main__':
     env = SubprocVecEnv(env_fns)
     #model = PPO.load("test\poke_1024000_steps.zip", env=env, verbose=1, n_steps=16000)
     model = PPO('CnnPolicy', env, verbose=1, n_steps=8000, batch_size=128, n_epochs=3, gamma=0.998)
-    checkpoint_callback = CheckpointCallback(save_freq=8000, save_path='test', name_prefix='poke')
+    checkpoint_callback = CheckpointCallback(save_freq=8000, save_path='checkpoints', name_prefix='poke')
     model.learn(total_timesteps=100000000, callback=checkpoint_callback)
     model.save("ppo_pokemon_fin")

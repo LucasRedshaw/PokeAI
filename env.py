@@ -59,9 +59,9 @@ class GameBoyEnv(gym.Env):
         #print(current_coords)
 
         if current_coords not in self.seen_coords:
-              # Reward for discovering a new state
+            coordreward = 1
             self.seen_coords.add(current_coords)  # Mark this state as seen
-            coordreward = (0.02 * len(self.seen_coords))
+            #coordreward = (0.02 * len(self.seen_coords))
 
         if mapid not in self.seen_maps:
             mapidreward = 0
@@ -78,12 +78,12 @@ class GameBoyEnv(gym.Env):
 
             self.seen_maps.add(mapid)
 
-        # if pokelvlsum > self.pokelvlsumtrack:
-        #     levelupreward = 8
-        #     print("Caught or Levelled")
-        #     self.pokelvlsumtrack = pokelvlsum
+        if pokelvlsum > self.pokelvlsumtrack:
+            levelupreward = 8
+            print("Caught or Levelled")
+            self.pokelvlsumtrack = pokelvlsum
 
-        levelupreward = (0.2 *(pokelvlsum - 6))
+        # levelupreward = (0.2 *(pokelvlsum - 6))
         reward = coordreward + mapidreward + levelupreward
         self.explorationrewardtotal += coordreward
         self.levelrewardtotal += levelupreward
@@ -106,7 +106,7 @@ class GameBoyEnv(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         np.random.seed(seed)
-        with open("state_file.state", "rb") as f:
+        with open("states\state_file.state", "rb") as f:
             self.pyboy.load_state(f)
         observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
         info = {}
