@@ -90,7 +90,7 @@ class GameBoyEnv(gym.Env):
         self.rewardtotal += reward 
         
         if self.current_step >= self.max_steps:
-            print("Reward of " + str(self.rewardtotal) + " | Exploration: "+ str(self.explorationrewardtotal) + " | Levels: "+ str(self.levelrewardtotal))
+            print("Reward of " + str(self.rewardtotal) + " | Exploration: "+ str(self.explorationrewardtotal) + " | Levels: "+ str(self.levelrewardtotal) + " (" + str(self.pokelvlsumtrack) + ")")
             done = True
         else:
             done = False
