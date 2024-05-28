@@ -11,6 +11,15 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.callbacks import CheckpointCallback
 from datetime import datetime
 from helpers.stream import StreamWrapper
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.conf')
+ep_length = int(config['PPO']['ep_length'])
+total_length = int(config['PPO']['total_length'])
+agents = int(config['PPO']['agents'])
+load_checkpoint = config.getboolean('PPO', 'load_checkpoint')
+checkpoint_path = config['PPO']['checkpoint_path']
 
 def make_env(rank, seed=0):
     def _init():
@@ -30,10 +39,13 @@ def make_env(rank, seed=0):
     return _init
 
 if __name__ == '__main__':
-    env_fns = [make_env(i) for i in range(8)]
+    env_fns = [make_env(i) for i in range(agents)]
     env = SubprocVecEnv(env_fns)
-    #model = PPO.load("test\poke_1024000_steps.zip", env=env, verbose=1, n_steps=16000)
-    model = PPO('CnnPolicy', env, verbose=1, n_steps=12000, batch_size=128, n_epochs=3, gamma=0.998)
-    checkpoint_callback = CheckpointCallback(save_freq=12000, save_path='checkpoints', name_prefix='poke')
-    model.learn(total_timesteps=100000000, callback=checkpoint_callback)
+
+    if load_checkpoint and exists(checkpoint_path):
+        model = PPO.load(checkpoint_path, env=env, verbose=1, n_steps=ep_length)
+    else:
+        model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length, batch_size=128, n_epochs=3, gamma=0.998)
+    checkpoint_callback = CheckpointCallback(save_freq=ep_length, save_path='checkpoints', name_prefix='poke')
+    model.learn(total_timesteps=total_length, callback=checkpoint_callback)
     model.save("ppo_pokemon_fin")

@@ -14,6 +14,11 @@ import datetime
 import csv
 import helpers.heatmap as heatmap
 import os
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.conf')
+ep_length = int(config['PPO']['ep_length'])
 
 class GameBoyEnv(gym.Env):
     def __init__(self, game_rom, window='null'):
@@ -25,7 +30,7 @@ class GameBoyEnv(gym.Env):
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
-        self.max_steps = 12000
+        self.max_steps = ep_length
         self.current_step = 0
         self.rewardtotal = 0
         self.explorationrewardtotal = 0
