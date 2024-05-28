@@ -14,6 +14,7 @@ import datetime
 import csv
 import heatmap
 import os
+import ram_map
 
 class GameBoyEnv(gym.Env):
     def __init__(self, game_rom, window='null'):
@@ -22,7 +23,10 @@ class GameBoyEnv(gym.Env):
         self.pyboy.set_emulation_speed(0)
         
         self.action_space = spaces.Discrete(6)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype='uint8')
+        # self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 4), dtype='uint8')
+        self.observation_space = spaces.Dict({
+                "screen": spaces.Box(low=0, high=255, shape=self.render().shape, dtype=np.uint8)
+            })
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
@@ -32,6 +36,14 @@ class GameBoyEnv(gym.Env):
         self.pokelvlsumtrack = 6
         #open('player_coordinates.csv', mode='w').close()
 
+    def _get_obs(self):
+        observation = {
+            "screen": self.render(),
+        }
+        return observation
+
+    def render(self):
+        return self.pyboy.screen.ndarray[::2, ::2]
 
     def step(self, action):
 
@@ -39,17 +51,12 @@ class GameBoyEnv(gym.Env):
         self.current_step += 1
         self.pyboy.tick(60)
 
-        observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
-
-
         reward =  0
         coordreward = 0
         mapidreward = 0
         levelupreward = 0
     
         mapid = self.pyboy.memory[0xD35E]
-        xcoord = self.pyboy.memory[0xD362]
-        ycoord = self.pyboy.memory[0xD361]
 
         poke1lvl = self.pyboy.memory[0xD18C]
         poke2lvl = self.pyboy.memory[0xD1B8]
@@ -60,13 +67,10 @@ class GameBoyEnv(gym.Env):
 
         pokelvlsum = poke1lvl + poke2lvl + poke3lvl + poke4lvl + poke5lvl + poke6lvl
 
-        current_coords = (mapid, xcoord, ycoord)
-        #print(current_coords)
-
-        if current_coords not in self.seen_coords:
-              # Reward for discovering a new state
-            self.seen_coords.add(current_coords)  # Mark this state as seen
-            coordreward = (0.02 * len(self.seen_coords))
+        # Exploration
+        r, c, map_n = ram_map.position(self.pyboy) # this is [y, x, z]
+        self.seen_coords.add((r, c, map_n))
+        coordreward = (0.02 * len(self.seen_coords))
 
         if mapid not in self.seen_maps:
             mapidreward = 0
@@ -98,6 +102,7 @@ class GameBoyEnv(gym.Env):
             done = False
 
         truncated = False
+        obs = self._get_obs()
         info = {}
 
         #print(reward)
@@ -105,10 +110,8 @@ class GameBoyEnv(gym.Env):
         #     writer = csv.writer(file)
         #     writer.writerow([self.current_step, mapid, xcoord, ycoord])
 
-        return observation, reward, done, truncated, info
+        return obs, reward, done, truncated, info
 
-    
-    
     def reset(self, seed=None, options=None):
 
         super().reset(seed=seed)
@@ -116,7 +119,7 @@ class GameBoyEnv(gym.Env):
         with open("state_file.state", "rb") as f:
             self.pyboy.load_state(f)
 
-        observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
+        # observation = np.array(self.pyboy.screen.image)[:, :, :3][::2, ::2]
 
         info = {}
         self.seen_coords = set()
@@ -147,9 +150,7 @@ class GameBoyEnv(gym.Env):
 
         #print("Reset Environment")
 
-        return observation, info
-
-        
+        return self._get_obs(), info
 
     def take_action(self, action):
         if action == 0:
