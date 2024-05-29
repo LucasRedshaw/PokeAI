@@ -12,12 +12,14 @@ classifiers = [
 	"Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = [
-    "pillow",
-    "gymnasium",
-    "pyboy",
+    "Pillow==9.5.0",
+    "gymnasium==0.28.1",
+    "pyboy==2.0.3",
     "wandb",
     "websockets",
-    "stable_baselines3",
+    "pufferlib[cleanrl]>=0.7.3",
+    "pettingzoo",
+    "gym==0.23",
 ]
 [tool.setuptools.packages.find]
 where = ["."]
