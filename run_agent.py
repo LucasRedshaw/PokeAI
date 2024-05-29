@@ -4,7 +4,7 @@ from stable_baselines3.common.utils import set_random_seed
 
 def make_env(rank, seed=0):
     def _init():
-        env = GameBoyEnv('PokemonRed.gb', window='SDL2')
+        env = GameBoyEnv('rom\PokemonRed.gb', window='SDL2')
         env.reset(seed=(seed + rank))
         return env
     set_random_seed(seed)
@@ -12,7 +12,7 @@ def make_env(rank, seed=0):
 
 if __name__ == '__main__':
     env = make_env(0)() 
-    file_name = 'test\poke_2944000_steps.zip'
+    file_name = 'checkpoints\poke_2880000_steps.zip'
     print('\nloading checkpoint')
     model = PPO.load(file_name, env=env)
     obs, info = env.reset()

@@ -1,5 +1,6 @@
 grid.psd
 /heatmaps
 /checkpoints
+/tensorboard_logs
 PokemonRed.gb
 PokemonRed.gb.ram

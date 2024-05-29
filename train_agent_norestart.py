@@ -8,11 +8,31 @@ from stable_baselines3 import A2C, PPO
 from stable_baselines3.common import env_checker
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import CheckpointCallback, BaseCallback, CallbackList
 from datetime import datetime
 from helpers.stream import StreamWrapper
+from tensorboardX import SummaryWriter
 import configparser
+from stable_baselines3.common.logger import configure
+import numpy as np
 
+
+## tensorboard --logdir=tensorboard_logs
+## https://pwhiddy.github.io/pokerl-map-viz/
+
+log_dir = "tensorboard_logs"
+writer = SummaryWriter(log_dir)
+
+class TensorboardCallback(BaseCallback):
+    def __init__(self, verbose=0):
+        super().__init__(verbose)
+        self.writer = SummaryWriter(log_dir)
+
+    def _on_step(self) -> bool:
+        value = np.random.random()
+        self.writer.add_scalar("random_value", value, self.num_timesteps)
+        return True
+    
 config = configparser.ConfigParser()
 config.read('config.conf')
 ep_length = int(config['PPO']['ep_length'])
@@ -42,10 +62,16 @@ if __name__ == '__main__':
     env_fns = [make_env(i) for i in range(agents)]
     env = SubprocVecEnv(env_fns)
 
+    log_dir = "tensorboard_logs"
+    logger = configure(log_dir, ["tensorboard"])
+
     if load_checkpoint and exists(checkpoint_path):
-        model = PPO.load(checkpoint_path, env=env, verbose=1, n_steps=ep_length)
+        print("model loaded")
+        model = PPO.load(checkpoint_path, env=env, verbose=1, n_steps=ep_length, batch_size=128, n_epochs=3, gamma=0.998, tensorboard_log=log_dir)
     else:
-        model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length, batch_size=128, n_epochs=3, gamma=0.998)
+        print("new model")
+        model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length, gamma=0.998, tensorboard_log=log_dir)
     checkpoint_callback = CheckpointCallback(save_freq=ep_length, save_path='checkpoints', name_prefix='poke')
-    model.learn(total_timesteps=total_length, callback=checkpoint_callback)
+    callback = CallbackList([checkpoint_callback, TensorboardCallback()])
+    model.learn(total_timesteps=total_length, callback=callback)
     model.save("ppo_pokemon_fin")
