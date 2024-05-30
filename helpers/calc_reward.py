@@ -17,32 +17,12 @@ def calc_exploration_reward(GameBoyEnv):
 
     if coords not in GameBoyEnv.seen_coords:
 
-        exploration_reward = 1
+        coordvalue = 1
+        explorationvalue = (0.01 * len(GameBoyEnv.seen_coords))
 
-        if mapid == 1:
-            #print("Viridian City")
-            exploration_reward += 0.2
-        if mapid == 12:
-            #print("Route 1")
-            exploration_reward += 0.1
-        if mapid == 51:
-            #print("Viridian Forest")
-            exploration_reward += 0.3
-        if mapid == 50:
-            #print("Viridian Forest")
-            exploration_reward += 0.3
-        if mapid == 47:
-            #print("Viridian Forest")
-            exploration_reward += 0.3
-        if mapid == 13:
-            #print("Route 2")
-            exploration_reward += 0.3
-        if mapid == 2:
-            #print("Pewter City")
-            exploration_reward += 0.4
+        exploration_reward = coordvalue + explorationvalue
+
         GameBoyEnv.seen_coords.add(coords)
-
-        #coordreward = (0.02 * len(self.seen_coords))
 
     if mapid not in GameBoyEnv.seen_maps:
         if mapid == 1:
