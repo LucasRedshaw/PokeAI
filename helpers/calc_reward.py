@@ -45,7 +45,7 @@ def calc_level_reward(GameBoyEnv):
     level_rewards = 0
 
     if pokelvlsum > GameBoyEnv.pokelvlsumtrack:
-        level_rewards = 50*(pokelvlsum - GameBoyEnv.pokelvlsumtrack)
+        level_rewards = pokelvlsum
         #levelupreward = 8
         #print("Caught or Levelled")
         GameBoyEnv.pokelvlsumtrack = pokelvlsum
