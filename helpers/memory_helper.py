@@ -17,6 +17,18 @@ def get_level_sum(GameBoyEnv):
 
     return pokelvlsum
 
+def get_opponent_level(GameBoyEnv):
+    
+    opponentlvl1 = GameBoyEnv.pyboy.memory[0xD8C5]
+    opponentlvl2 = GameBoyEnv.pyboy.memory[0xD8F1]
+    opponentlvl3 = GameBoyEnv.pyboy.memory[0xD91D]
+    opponentlvl4 = GameBoyEnv.pyboy.memory[0xD949]
+    opponentlvl5 = GameBoyEnv.pyboy.memory[0xD975]
+    opponentlvl6 = GameBoyEnv.pyboy.memory[0xD9A1]
+    opponentlvlsum = opponentlvl1 + opponentlvl2 + opponentlvl3 + opponentlvl4 + opponentlvl5 + opponentlvl6
+
+    return opponentlvlsum
+
 def get_hp(GameBoyEnv):
     poke1maxhp1 = GameBoyEnv.pyboy.memory[0xD18D]
     poke1maxhp2 = GameBoyEnv.pyboy.memory[0xD18E]
@@ -65,4 +77,4 @@ def get_hp(GameBoyEnv):
 
     hptracker = sumcurrenthp / summaxhp
 
-    return hptracker
+    return hptracker, sumcurrenthp, summaxhp 

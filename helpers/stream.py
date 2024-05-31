@@ -1,8 +1,8 @@
 import asyncio
 import websockets
 import json
-
 import gymnasium as gym
+from helpers import calc_reward
 
 X_POS_ADDRESS, Y_POS_ADDRESS = 0xD362, 0xD361
 MAP_N_ADDRESS = 0xD35E
@@ -35,6 +35,10 @@ class StreamWrapper(gym.Wrapper):
         self.coord_list.append([x_pos, y_pos, map_n])
 
         if self.steam_step_counter >= self.upload_interval:
+
+            extra = str("RW: " + str(round(self.env.rewardtotal,2)) + "\n" + "LVL: " + str(self.env.pokelvlsumtrack))    
+
+            self.stream_metadata["extra"] = extra
             try:
                 metadata_serializable = {k: v for k, v in self.stream_metadata.items() if isinstance(v, (str, int, float, list, dict))}
                 message = json.dumps({

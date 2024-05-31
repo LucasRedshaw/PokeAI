@@ -1,17 +1,11 @@
-import gymnasium as gym  # Updated to gymnasium
-from gymnasium import spaces  # Updated to gymnasium
+import gymnasium as gym  
+from gymnasium import spaces  
 from pyboy import PyBoy
-from pyboy.utils import WindowEvent
 import numpy as np
-from PIL import Image
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3.common.vec_env import DummyVecEnv
-from datetime import datetime
-import helpers.heatmap as heatmap
 import configparser
 from helpers import calc_reward
 from helpers import memory_helper
+import numpy as np
 
 config = configparser.ConfigParser()
 config.read('config.conf')
@@ -24,7 +18,7 @@ class GameBoyEnv(gym.Env):
         self.pyboy = PyBoy(game_rom, window=window)
         self.pyboy.set_emulation_speed(0)
         self.action_space = spaces.Discrete(8)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype='uint8')
+        self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
         self.seen_coords = set()
         self.seen_maps = set()
         self.seen_maps.add(40)
@@ -35,8 +29,11 @@ class GameBoyEnv(gym.Env):
         self.levelrewardtotal = 0
         self.pokelvlsumtrack = 6
         self.wait1 = 0
-
-        #open('player_coordinates.csv', mode='w').close()
+        self.previousreward = 0
+        self.truetotal = 0
+        self.resetssurvived = 0
+        self.hpold = 0
+        self.opplvlold = 0
 
     def step(self, action):
 
@@ -48,34 +45,30 @@ class GameBoyEnv(gym.Env):
 
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
 
-        hptracker = memory_helper.get_hp(self)
-
-        if hptracker == 0:
-            if self.wait1 == 0:
-                print("Fainted")
-                self.wait1 = 1
-        else:
-            self.wait1 = 0
-
         reward, exploration_reward, level_reward = calc_reward.calc_reward(self)
 
         self.explorationrewardtotal += exploration_reward
         self.levelrewardtotal += level_reward
         self.rewardtotal += reward 
+        self.truetotal += reward
 
         if self.current_step >= self.max_steps:
-            print("Reward of " + str(self.rewardtotal) + " | Exploration: "+ str(self.explorationrewardtotal) + " | Levels: "+ str(self.levelrewardtotal) + " (" + str(self.pokelvlsumtrack) + ")")
-            done = True
+            if self.rewardtotal < 1:
+                done = True
+            else:
+                self.rewardtotal = 0
+                self.current_step = 0
+                self.resetssurvived += 1
+                done = False
         else:
             done = False
 
+
         truncated = False
-        info = {"total_reward": self.rewardtotal} if done else {}
+        info = {}
         return observation, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
-        np.random.seed(seed)
         with open("states\\state_file.state", "rb") as f:
             self.pyboy.load_state(f)
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
@@ -85,9 +78,16 @@ class GameBoyEnv(gym.Env):
         self.seen_maps.add(40)
         self.current_step = 0
         self.rewardtotal = 0
+        self.hpold = 0
+
+        self.pokelvlsumtrack = 6
+
+        print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str(self.resetssurvived*ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
+        
         self.explorationrewardtotal = 0
         self.levelrewardtotal = 0
-        self.pokelvlsumtrack = 6
+        self.resetssurvived = 0
+        self.truetotal = 0
 
         return observation, info
 
@@ -111,7 +111,5 @@ class GameBoyEnv(gym.Env):
 
     def close(self):
         self.pyboy.stop()
-
-    
 
 
