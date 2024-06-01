@@ -44,7 +44,6 @@ class GameBoyEnv(gym.Env):
         self.pyboy.tick(24)
 
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
-        np.save('observation_copy.npy', observation)
 
         reward, exploration_reward, level_reward = calc_reward.calc_reward(self)
 

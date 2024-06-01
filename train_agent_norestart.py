@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     if load_checkpoint == True:
         print("model loaded")
-        model = PPO.load(checkpoint_path, env=env, verbose=1, n_steps=ep_length // 8, batch_size=128, n_epochs=3, gamma=0.998, tensorboard_log=log_dir, ent_coef=0.01)
+        model = PPO.load(checkpoint_path, env, verbose=1, n_steps=ep_length // 4, batch_size=256, n_epochs=5, gamma=0.995, tensorboard_log=log_dir, ent_coef=0.015)
     else:
         print("new model")
         model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length // 4, batch_size=256, n_epochs=5, gamma=0.995, tensorboard_log=log_dir, ent_coef=0.015)
