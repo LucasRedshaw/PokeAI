@@ -3,7 +3,7 @@
 
 # PokeAI
 
-A Pokemon Red Gymnasium environment for reinforcement learning using Stable Baslines 3.
+A Pokemon Red Gymnasium environment for reinforcement learning using Stable Baslines 3. The model interacts with the game by sending button presses, and observes the screen the same way a human player would.
 
 
 ## Progress
