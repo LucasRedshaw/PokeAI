@@ -38,9 +38,9 @@ class GameBoyEnv(gym.Env):
 
         self.current_step += 1
 
-        for _ in range(24):
-            self.pyboy.tick()
         self.take_action(action)
+
+        self.pyboy.tick(24)
 
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
 
