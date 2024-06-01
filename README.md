@@ -3,22 +3,22 @@
 
 # PokeAI
 
-A Pokemon Red Gymnasium environment for reinforcement learning using Stable Baslines 3.
+A Pokemon Red Gymnasium environment for reinforcement learning using Stable Baslines 3. The model interacts with the game by sending button presses, and observes the screen the same way a human player would.
 
 
 ## Progress
 
-![Static Badge](https://img.shields.io/badge/Code%20Runs%20-%20Achieved%20-%20Red?color=green)
+![Static Badge](https://img.shields.io/badge/Code%20Runs%20-%20Completed%20-%20Red?color=green)
 
-![Static Badge](https://img.shields.io/badge/Viridian%20Forrest%20-%20Achieved%20-%20Red?color=green)
+![Static Badge](https://img.shields.io/badge/Viridian%20Forrest%20-%20Completed%20-%20Red?color=green)
 
-![Static Badge](https://img.shields.io/badge/First%20Gym%20-%20Achieved%20-%20Red?color=green)
+![Static Badge](https://img.shields.io/badge/First%20Gym%20-%20Completed%20-%20Red?color=green)
 
-![Static Badge](https://img.shields.io/badge/Mount%20Moon%20-%20Not%20Achieved%20-%20Red?color=red)
+![Static Badge](https://img.shields.io/badge/Mount%20Moon%20-%20Not%20Completed%20-%20Red?color=red)
 
-![Static Badge](https://img.shields.io/badge/Rescue%20Bill%20-%20Not%20Achieved%20-%20Red?color=red)
+![Static Badge](https://img.shields.io/badge/Rescue%20Bill%20-%20Not%20Completed%20-%20Red?color=red)
 
-![Static Badge](https://img.shields.io/badge/Second%20Gym%20-%20Not%20Achieved%20-%20Red?color=red)
+![Static Badge](https://img.shields.io/badge/Second%20Gym%20-%20Not%20Completed%20-%20Red?color=red)
 
 ## Run Locally
 
