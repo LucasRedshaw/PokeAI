@@ -10,6 +10,7 @@ import numpy as np
 config = configparser.ConfigParser()
 config.read('config.conf')
 ep_length = int(config['PPO']['ep_length'])
+rewardthreshold = int(config['PPO']['rewardthreshold'])
 
 class GameBoyEnv(gym.Env):
     def __init__(self, game_rom, window='null'):
@@ -53,7 +54,7 @@ class GameBoyEnv(gym.Env):
         self.truetotal += reward
 
         if self.current_step >= self.max_steps:
-            if self.rewardtotal < 4:
+            if self.rewardtotal < rewardthreshold:
                 done = True
             else:
                 self.rewardtotal = 0
