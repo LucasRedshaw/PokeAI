@@ -33,6 +33,7 @@ class GameBoyEnv(gym.Env):
         self.resetssurvived = 0
         self.hpold = 0
         self.opplvlold = 0
+        self.badges = 0
 
     def step(self, action):
 
@@ -43,6 +44,7 @@ class GameBoyEnv(gym.Env):
         self.pyboy.tick(24)
 
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
+        np.save('observation_copy.npy', observation)
 
         reward, exploration_reward, level_reward = calc_reward.calc_reward(self)
 
@@ -52,7 +54,7 @@ class GameBoyEnv(gym.Env):
         self.truetotal += reward
 
         if self.current_step >= self.max_steps:
-            if self.rewardtotal < 2:
+            if self.rewardtotal < 4:
                 done = True
             else:
                 self.rewardtotal = 0
@@ -78,6 +80,7 @@ class GameBoyEnv(gym.Env):
         self.current_step = 0
         self.rewardtotal = 0
         self.hpold = 0
+        self.badges = 0
 
         self.pokelvlsumtrack = 6
 

@@ -29,6 +29,10 @@ def get_opponent_level(GameBoyEnv):
 
     return opponentlvlsum
 
+def get_badges(GameBoyEnv):
+    badges = GameBoyEnv.pyboy.memory[0xD356]
+    return badges
+
 def get_hp(GameBoyEnv):
     poke1maxhp1 = GameBoyEnv.pyboy.memory[0xD18D]
     poke1maxhp2 = GameBoyEnv.pyboy.memory[0xD18E]

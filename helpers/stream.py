@@ -36,7 +36,7 @@ class StreamWrapper(gym.Wrapper):
 
         if self.steam_step_counter >= self.upload_interval:
 
-            extra = str("RW: " + str(round(self.env.rewardtotal,2)) + "\n" + "LVL: " + str(self.env.pokelvlsumtrack))    
+            extra = str("RW: " + str(round(self.env.rewardtotal,2)) + "\n" + "LVL: " + str(self.env.pokelvlsumtrack) + "\n" + "BADGE: " + str(self.env.badges))    
 
             self.stream_metadata["extra"] = extra
             try:
