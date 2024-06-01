@@ -15,7 +15,6 @@ dependencies = [
     "pillow",
     "gymnasium",
     "pyboy",
-    "wandb",
     "websockets",
     "stable_baselines3",
 ]

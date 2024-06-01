@@ -16,7 +16,6 @@ class GameBoyEnv(gym.Env):
 
         super(GameBoyEnv, self).__init__()
         self.pyboy = PyBoy(game_rom, window=window)
-        self.pyboy.set_emulation_speed(0)
         self.action_space = spaces.Discrete(8)
         self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
         self.seen_coords = set()
@@ -39,9 +38,9 @@ class GameBoyEnv(gym.Env):
 
         self.current_step += 1
 
+        for _ in range(24):
+            self.pyboy.tick()
         self.take_action(action)
-
-        self.pyboy.tick(24)
 
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
 
@@ -53,7 +52,7 @@ class GameBoyEnv(gym.Env):
         self.truetotal += reward
 
         if self.current_step >= self.max_steps:
-            if self.rewardtotal < 1:
+            if self.rewardtotal < 2:
                 done = True
             else:
                 self.rewardtotal = 0

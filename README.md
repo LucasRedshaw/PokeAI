@@ -12,6 +12,8 @@ A Pokemon Red Gymnasium environment for reinforcement learning using Stable Basl
 
 ![Static Badge](https://img.shields.io/badge/Second%20Gym%20-%20Not%20Achieved%20-%20Red?color=red)
 
+![Static Badge](https://img.shields.io/badge/First%20Gym%20-%20Not%20Achieved%20-%20Red?color=green)
+
 ## Run Locally
 
 Clone the project
