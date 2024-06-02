@@ -6,6 +6,7 @@ import configparser
 from helpers import calc_reward
 from helpers import memory_helper
 import numpy as np
+import csv
 
 config = configparser.ConfigParser()
 config.read('config.conf')
@@ -35,6 +36,11 @@ class GameBoyEnv(gym.Env):
         self.hpold = 0
         self.opplvlold = 0
         self.badges = 0
+        self.mapid = 0
+
+        # self.csv_file = open('stats.csv', 'w', newline='')
+        # self.csv_writer = csv.writer(self.csv_file)
+        # self.csv_writer.writerow(['Step', 'Map ID', 'Pokemon Level Sum', 'Reward', 'Total Reward', 'Badges'])
 
     def step(self, action):
 
@@ -52,6 +58,9 @@ class GameBoyEnv(gym.Env):
         self.levelrewardtotal += level_reward
         self.rewardtotal += reward 
         self.truetotal += reward
+
+        # if self.current_step % 24 == 0:
+        #     self.csv_writer.writerow([self.current_step] + [self.mapid] + [self.pokelvlsumtrack] + [self.rewardtotal] + [self.truetotal] + [self.badges])
 
         if self.current_step >= self.max_steps:
             if self.rewardtotal < rewardthreshold:
@@ -83,6 +92,9 @@ class GameBoyEnv(gym.Env):
         self.badges = 0
 
         self.pokelvlsumtrack = 6
+
+
+
 
         print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str(self.resetssurvived*ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
         

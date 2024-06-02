@@ -1,4 +1,5 @@
 from helpers import memory_helper
+
 pokelvlsum = 0
 badges = 0
 
@@ -68,6 +69,7 @@ def calc_heal_reward(GameBoyEnv):
 
 def calc_exploration_reward(GameBoyEnv):
     coords, mapid = memory_helper.get_coords(GameBoyEnv)
+    GameBoyEnv.mapid = mapid
     exploration_reward = 0
     if coords not in GameBoyEnv.seen_coords:
         coordvalue = 0.01

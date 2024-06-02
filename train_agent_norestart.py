@@ -37,7 +37,7 @@ def make_env(rank, seed=0):
             stream_metadata = { # All of this is part is optional
                 "user": username +"\n", # choose your own username
                 "env_id": id, # environment identifier
-                "color": "#07242e", # choose your color :)
+                "color": color, # choose your color :)
                 "extra": "", # any extra text you put here will be displayed
             }
         )
