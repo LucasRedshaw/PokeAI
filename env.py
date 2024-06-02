@@ -7,6 +7,8 @@ from helpers import calc_reward
 from helpers import memory_helper
 import numpy as np
 import csv
+import os
+
 
 config = configparser.ConfigParser()
 config.read('config.conf')
@@ -43,17 +45,11 @@ class GameBoyEnv(gym.Env):
         # self.csv_writer.writerow(['Step', 'Map ID', 'Pokemon Level Sum', 'Reward', 'Total Reward', 'Badges'])
 
     def step(self, action):
-
         self.current_step += 1
-
         self.take_action(action)
-
         self.pyboy.tick(24)
-
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
-
         reward, exploration_reward, level_reward = calc_reward.calc_reward(self)
-
         self.explorationrewardtotal += exploration_reward
         self.levelrewardtotal += level_reward
         self.rewardtotal += reward 
@@ -72,14 +68,13 @@ class GameBoyEnv(gym.Env):
                 done = False
         else:
             done = False
-
-
         truncated = False
         info = {}
         return observation, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
-        with open("states\\state_file.state", "rb") as f:
+        state_file_path = os.path.join('states', 'state_file.state')
+        with open(state_file_path, "rb") as f:
             self.pyboy.load_state(f)
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
         info = {}
@@ -90,12 +85,8 @@ class GameBoyEnv(gym.Env):
         self.rewardtotal = 0
         self.hpold = 0
         self.badges = 0
-
         self.pokelvlsumtrack = 6
-
-
-
-
+        
         print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str(self.resetssurvived*ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
         
         self.explorationrewardtotal = 0

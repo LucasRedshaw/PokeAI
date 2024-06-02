@@ -29,9 +29,11 @@ checkpoint_path = config['PPO']['checkpoint_path']
 username = config['PPO']['username']
 color = config['PPO']['color']
 
+rom_path = os.path.join('rom', 'PokemonRed.gb')
+
 def make_env(rank, seed=0):
     def _init():
-        env = GameBoyEnv('rom\\PokemonRed.gb', window='null')
+        env = GameBoyEnv(rom_path, window='null')
         env.reset(seed=(seed + rank))
         env = StreamWrapper(
             env, 
