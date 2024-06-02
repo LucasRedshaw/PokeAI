@@ -33,15 +33,14 @@ class GameBoyEnv(gym.Env):
         self.explorationrewardtotal = 0
         self.levelrewardtotal = 0
         self.pokelvlsumtrack = 6
-        self.wait1 = 0
-        self.previousreward = 0
         self.truetotal = 0
         self.resetssurvived = 0
         self.hpold = 0
-        self.opplvlold = 0
         self.badges = 0
         self.mapid = 0
-
+        self.opplvlold = 0
+        self.previousreward = 0
+        self.wait1 = 0
         # self.csv_file = open('stats.csv', 'w', newline='')
         # self.csv_writer = csv.writer(self.csv_file)
         # self.csv_writer.writerow(['Step', 'Map ID', 'Pokemon Level Sum', 'Reward', 'Total Reward', 'Badges'])
@@ -90,6 +89,10 @@ class GameBoyEnv(gym.Env):
         self.hpold = 0
         self.badges = 0
         self.pokelvlsumtrack = 6
+        self.mapid = 0
+        self.opplvlold = 0
+        self.previousreward = 0
+        self.wait1 = 0
         
         print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str(self.resetssurvived*ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
         
