@@ -4,3 +4,4 @@ grid.psd
 /tensorboard_logs
 PokemonRed.gb
 PokemonRed.gb.ram
+*.pyc
