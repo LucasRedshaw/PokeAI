@@ -20,7 +20,7 @@ class GameBoyEnv(gym.Env):
 
         super(GameBoyEnv, self).__init__()
         self.pyboy = PyBoy(game_rom, window=window)
-        self.action_space = spaces.Discrete(8)
+        self.action_space = spaces.Discrete(7)
         self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
         self.seen_coords = set()
         self.seen_maps = set()
