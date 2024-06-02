@@ -10,7 +10,8 @@ def calc_reward(GameBoyEnv):
     faint_reward = calc_faint_reward(GameBoyEnv)
     battle_reward = calc_battle_reward(GameBoyEnv)
     badge_reward = calc_badge_reward(GameBoyEnv)
-    reward = exploration_reward + level_reward + heal_reward + faint_reward + battle_reward + badge_reward
+    checkpoint_reward = calc_checkpoint_reward(GameBoyEnv)
+    reward = exploration_reward + level_reward + heal_reward + faint_reward + battle_reward + badge_reward + checkpoint_reward
     return reward, exploration_reward, level_reward
 
 def calc_badge_reward(GameBoyEnv):
@@ -49,12 +50,18 @@ def calc_heal_reward(GameBoyEnv):
     if mapid in pokemon_centers and hpcurrent > GameBoyEnv.hpold:
         heal_reward = 0.075 * (hpmax - GameBoyEnv.hpold)
         GameBoyEnv.hpold = hpcurrent
-        print("healed at", pokemon_centers[mapid])
+        print("Healed at ", pokemon_centers[mapid])
     else:
         GameBoyEnv.hpold = hpcurrent
     return heal_reward
 
-
+def calc_checkpoint_reward(GameBoyEnv):
+    checkpoint = memory_helper.get_checkpoint(GameBoyEnv)
+    checkpoint_reward = 0
+    if checkpoint not in GameBoyEnv.seen_checkpoints:
+        checkpoint_reward = 2
+        GameBoyEnv.seen_checkpoints.add(checkpoint)
+    return checkpoint_reward
 
 def calc_exploration_reward(GameBoyEnv):
     coords, mapid = memory_helper.get_coords(GameBoyEnv)
@@ -66,9 +73,6 @@ def calc_exploration_reward(GameBoyEnv):
         if mapid not in GameBoyEnv.seen_maps:
             if mapid in memory_helper.locations:
                 print(memory_helper.locations[mapid])
-            if mapid in memory_helper.pokemon_centers:
-                print(memory_helper.pokemon_centers[mapid])
-                coordvalue = 2
             GameBoyEnv.seen_maps.add(mapid)
         exploration_reward = coordvalue
         GameBoyEnv.seen_coords.add(coords)

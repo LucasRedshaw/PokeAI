@@ -24,6 +24,8 @@ class GameBoyEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
         self.seen_coords = set()
         self.seen_maps = set()
+        self.seen_checkpoints = set()
+        self.seen_checkpoints.add(0)
         self.seen_maps.add(40)
         self.max_steps = ep_length
         self.current_step = 0
@@ -80,6 +82,8 @@ class GameBoyEnv(gym.Env):
         info = {}
         self.seen_coords = set()
         self.seen_maps = set()
+        self.seen_checkpoints = set()
+        self.seen_checkpoints.add(0)
         self.seen_maps.add(40)
         self.current_step = 0
         self.rewardtotal = 0

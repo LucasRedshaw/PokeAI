@@ -264,7 +264,6 @@ locations = {
     247: "Agatha's room"
 }
 
-
 def get_coords(GameBoyEnv):
     mapid = GameBoyEnv.pyboy.memory[0xD35E]
     xcoord = GameBoyEnv.pyboy.memory[0xD362]
@@ -272,6 +271,10 @@ def get_coords(GameBoyEnv):
     coords = (mapid, xcoord, ycoord)
 
     return coords, mapid
+
+def get_checkpoint(GameBoyEnv):
+    checkpoint = GameBoyEnv.pyboy.memory[0xD719]
+    return checkpoint
 
 def get_level_sum(GameBoyEnv):
     poke1lvl = GameBoyEnv.pyboy.memory[0xD18C]      
