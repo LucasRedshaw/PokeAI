@@ -7,13 +7,13 @@ config.read('config.conf')
 pokelvlsum = 0
 badges = 0
 
-badgevalue = float(config['PPO']['badge_reward'])
-battlevalue = float(config['PPO']['battle_reward'])
-faintvalue = float(config['PPO']['faint_reward'])
-healvalue = float(config['PPO']['heal_reward'])
-checkpointvalue = float(config['PPO']['checkpoint_reward'])
-newcoordvalue = float(config['PPO']['newcoord_reward'])
-lvlvalue = float(config['PPO']['level_reward'])
+badgevalue = float(config['REWARD']['badge_reward'])
+battlevalue = float(config['REWARD']['battle_reward'])
+faintvalue = float(config['REWARD']['faint_reward'])
+healvalue = float(config['REWARD']['heal_reward'])
+checkpointvalue = float(config['REWARD']['checkpoint_reward'])
+newcoordvalue = float(config['REWARD']['new_coord_reward'])
+lvlvalue = float(config['REWARD']['level_reward'])
 
 def calc_reward(GameBoyEnv):
     exploration_reward = calc_exploration_reward(GameBoyEnv)

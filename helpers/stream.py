@@ -11,7 +11,7 @@ MAP_N_ADDRESS = 0xD35E
 config = configparser.ConfigParser()
 config.read('config.conf')
 
-updatefrequency = int(config['PPO']['updatefrequency'])
+updatefrequency = int(config['STREAM']['updatefrequency'])
 
 class StreamWrapper(gym.Wrapper):
     def __init__(self, env, stream_metadata={}):
