@@ -19,6 +19,7 @@ def calc_badge_reward(GameBoyEnv):
     badge_reward = 0
     if badges > GameBoyEnv.badges:
         badge_reward = 5
+        GameBoyEnv.seen_coords = set()
         GameBoyEnv.badges = badges
     return badge_reward
 

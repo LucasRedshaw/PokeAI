@@ -93,7 +93,7 @@ class GameBoyEnv(gym.Env):
         self.opplvlold = 0
         self.previousreward = 0
         self.wait1 = 0
-        
+
         print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str(self.resetssurvived*ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
         
         self.explorationrewardtotal = 0

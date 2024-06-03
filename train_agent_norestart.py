@@ -57,7 +57,7 @@ if __name__ == '__main__':
         model = PPO.load(checkpoint_path, env, verbose=1, n_steps=ep_length // 4, batch_size=256, n_epochs=5, gamma=0.995, tensorboard_log=log_dir, ent_coef=0.015)
     else:
         print("new model")
-        model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length // 4, batch_size=256, n_epochs=5, gamma=0.995, tensorboard_log=log_dir, ent_coef=0.015)
+        model = PPO('CnnPolicy', env, verbose=1, n_steps=ep_length // 4, batch_size=256, n_epochs=5, gamma=0.997, tensorboard_log=log_dir, ent_coef=0.0125)
     checkpoint_callback = CheckpointCallback(save_freq=ep_length, save_path='checkpoints', name_prefix='poke')
     callback = CallbackList([checkpoint_callback])
     model.learn(total_timesteps=total_length, callback=callback)
