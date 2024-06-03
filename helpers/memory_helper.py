@@ -178,7 +178,7 @@ locations = {
     161: "Seafoam Islands",
     162: "Seafoam Islands",
     163: "Vermilion City Fishing Brother",
-     164: "Fuchsia City Fishing Brother",
+    164: "Fuchsia City Fishing Brother",
     165: "Pokémon Mansion (1F)",
     166: "Gym (Cinnabar Island)",
     167: "Pokémon Lab (Cinnabar Island)",
