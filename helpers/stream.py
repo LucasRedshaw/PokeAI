@@ -3,9 +3,15 @@ import websockets
 import json
 import gymnasium as gym
 from helpers import calc_reward
+import configparser
 
 X_POS_ADDRESS, Y_POS_ADDRESS = 0xD362, 0xD361
 MAP_N_ADDRESS = 0xD35E
+
+config = configparser.ConfigParser()
+config.read('config.conf')
+
+updatefrequency = int(config['PPO']['updatefrequency'])
 
 class StreamWrapper(gym.Wrapper):
     def __init__(self, env, stream_metadata={}):
@@ -18,7 +24,7 @@ class StreamWrapper(gym.Wrapper):
         self.loop.run_until_complete(
             self.establish_wc_connection()
         )
-        self.upload_interval = 100
+        self.upload_interval = updatefrequency
         self.steam_step_counter = 0
         self.coord_list = []
         if hasattr(env, "pyboy"):

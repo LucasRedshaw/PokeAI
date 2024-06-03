@@ -1,7 +1,19 @@
 from helpers import memory_helper
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.conf')
 
 pokelvlsum = 0
 badges = 0
+
+badgevalue = float(config['PPO']['badge_reward'])
+battlevalue = float(config['PPO']['battle_reward'])
+faintvalue = float(config['PPO']['faint_reward'])
+healvalue = float(config['PPO']['heal_reward'])
+checkpointvalue = float(config['PPO']['checkpoint_reward'])
+newcoordvalue = float(config['PPO']['newcoord_reward'])
+lvlvalue = float(config['PPO']['level_reward'])
 
 def calc_reward(GameBoyEnv):
     exploration_reward = calc_exploration_reward(GameBoyEnv)
@@ -18,7 +30,7 @@ def calc_badge_reward(GameBoyEnv):
     badges = memory_helper.get_badges(GameBoyEnv)
     badge_reward = 0
     if badges > GameBoyEnv.badges:
-        badge_reward = 5
+        badge_reward = badgevalue
         GameBoyEnv.seen_coords = set()
         GameBoyEnv.badges = badges
     return badge_reward
@@ -27,7 +39,7 @@ def calc_battle_reward(GameBoyEnv):
     battle_reward = 0
     opponentlvls = memory_helper.get_opponent_level(GameBoyEnv)
     if opponentlvls > 5 and opponentlvls != GameBoyEnv.opplvlold:
-        battle_reward = 0.1*(opponentlvls)
+        battle_reward = battlevalue*(opponentlvls)
         GameBoyEnv.opplvlold = opponentlvls
     return battle_reward
 
@@ -37,7 +49,7 @@ def calc_faint_reward(GameBoyEnv):
     if hptracker == 0:
         if GameBoyEnv.wait1 == 0:
             print("Fainted")
-            faint_reward = -0.1
+            faint_reward = faintvalue
             GameBoyEnv.wait1 = 1
     else:
         GameBoyEnv.wait1 = 0
@@ -49,7 +61,7 @@ def calc_heal_reward(GameBoyEnv):
     pokemon_centers = memory_helper.pokemon_centers
     heal_reward = 0
     if mapid in pokemon_centers and hpcurrent > GameBoyEnv.hpold:
-        heal_reward = 0.075 * (hpmax - GameBoyEnv.hpold)
+        heal_reward = healvalue * (hpmax - GameBoyEnv.hpold)
         GameBoyEnv.hpold = hpcurrent
         print("Healed at ", pokemon_centers[mapid])
     else:
@@ -60,7 +72,7 @@ def calc_checkpoint_reward(GameBoyEnv):
     checkpoint = memory_helper.get_checkpoint(GameBoyEnv)
     checkpoint_reward = 0
     if checkpoint not in GameBoyEnv.seen_checkpoints:
-        checkpoint_reward = 2
+        checkpoint_reward = checkpointvalue
         GameBoyEnv.seen_checkpoints.add(checkpoint)
     return checkpoint_reward
 
@@ -68,7 +80,7 @@ def calc_exploration_reward(GameBoyEnv):
     coords, mapid = memory_helper.get_coords(GameBoyEnv)
     GameBoyEnv.mapid = mapid
     exploration_reward = 0
-    coordvalue = 0.01  # Default coordinate value
+    coordvalue = newcoordvalue  # Default coordinate value
 
     if coords not in GameBoyEnv.seen_coords:
         if mapid not in GameBoyEnv.seen_maps:
@@ -84,7 +96,7 @@ def calc_level_reward(GameBoyEnv):
     pokelvlsum = memory_helper.get_level_sum(GameBoyEnv)
     level_rewards = 0
     if pokelvlsum > GameBoyEnv.pokelvlsumtrack:
-        level_rewards = 0.25*(pokelvlsum - GameBoyEnv.pokelvlsumtrack)
+        level_rewards = lvlvalue*(pokelvlsum - GameBoyEnv.pokelvlsumtrack)
         GameBoyEnv.pokelvlsumtrack = pokelvlsum
     return level_rewards
 

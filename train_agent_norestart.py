@@ -19,6 +19,7 @@ writer = SummaryWriter(log_dir)
     
 config = configparser.ConfigParser()
 config.read('config.conf')
+
 ep_length = int(config['PPO']['ep_length'])
 total_length = int(config['PPO']['total_length'])
 agents = int(config['PPO']['agents'])
@@ -26,6 +27,12 @@ load_checkpoint = config.getboolean('PPO', 'load_checkpoint')
 checkpoint_path = config['PPO']['checkpoint_path']
 username = config['STREAM']['username']
 color = config['STREAM']['color']
+verbose = int(config['PPO']['verbose'])
+nstepdivisor = int(config['PPO']['nstepdivisor'])
+batchsize = int(config['PPO']['batchsize'])
+epochs = int(config['PPO']['epochs'])
+gamma = float(config['PPO']['gamma'])
+ent_coef = float(config['PPO']['ent_coef'])
 
 def make_env(rank, seed=0):
     def _init():
@@ -46,9 +53,7 @@ def make_env(rank, seed=0):
 
 if __name__ == '__main__':
     env_fns = [make_env(i) for i in range(agents)]
-    env1 = SubprocVecEnv(env_fns)
-    env = VecFrameStack(env1, n_stack=3, channels_order='last')  # Added VecFrameStack here
-
+    env = SubprocVecEnv(env_fns)
     log_dir = "tensorboard_logs"
     logger = configure(log_dir, ["tensorboard"])
 
@@ -57,25 +62,26 @@ if __name__ == '__main__':
         model = PPO.load(
             checkpoint_path, 
             env, 
-            verbose=1, 
-            n_steps=ep_length // 4, 
-            batch_size=256, 
-            n_epochs=5, 
-            gamma=0.995, 
+            verbose=verbose, 
+            n_steps=ep_length // nstepdivisor, 
+            batch_size=batchsize, 
+            n_epochs=epochs, 
+            gamma=gamma, 
             tensorboard_log=log_dir, 
-            ent_coef=0.015)
+            ent_coef=ent_coef
+            )
     else:
         print("new model")
         model = PPO(
             policy='CnnPolicy',
             env=env,
-            verbose=1,
-            n_steps=ep_length // 4,
-            batch_size=256,
-            n_epochs=5,
-            gamma=0.995,
+            verbose=verbose,
+            n_steps=ep_length // nstepdivisor,
+            batch_size=batchsize,
+            n_epochs=epochs,
+            gamma=gamma,
             tensorboard_log=log_dir,
-            ent_coef=0.015
+            ent_coef=ent_coef
         )
     
     checkpoint_callback = CheckpointCallback(save_freq=ep_length, save_path='checkpoints', name_prefix='poke')
