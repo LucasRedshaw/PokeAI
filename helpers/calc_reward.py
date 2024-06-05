@@ -14,6 +14,7 @@ healvalue = float(config['REWARD']['heal_reward'])
 checkpointvalue = float(config['REWARD']['checkpoint_reward'])
 newcoordvalue = float(config['REWARD']['new_coord_reward'])
 lvlvalue = float(config['REWARD']['level_reward'])
+badgemultiplier = float(config['REWARD']['badge_multiplier'])
 
 def calc_reward(GameBoyEnv):
     exploration_reward = calc_exploration_reward(GameBoyEnv)
@@ -23,15 +24,15 @@ def calc_reward(GameBoyEnv):
     battle_reward = calc_battle_reward(GameBoyEnv)
     badge_reward = calc_badge_reward(GameBoyEnv)
     checkpoint_reward = calc_checkpoint_reward(GameBoyEnv)
-    reward = exploration_reward + level_reward + heal_reward + faint_reward + battle_reward + badge_reward + checkpoint_reward
-    return reward, exploration_reward, level_reward
+    badges = memory_helper.get_badges(GameBoyEnv)
+    reward = ((badgemultiplier*badges)+1)*(exploration_reward + level_reward + heal_reward + faint_reward + battle_reward + badge_reward + checkpoint_reward)
+    return reward, exploration_reward, level_reward, heal_reward, faint_reward, battle_reward, badge_reward, checkpoint_reward
 
 def calc_badge_reward(GameBoyEnv):
     badges = memory_helper.get_badges(GameBoyEnv)
     badge_reward = 0
     if badges > GameBoyEnv.badges:
         badge_reward = badgevalue
-        GameBoyEnv.seen_coords = set()
         GameBoyEnv.badges = badges
     return badge_reward
 
