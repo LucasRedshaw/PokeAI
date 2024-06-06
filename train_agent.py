@@ -36,7 +36,8 @@ ent_coef = float(config['PPO']['ent_coef'])
 
 def make_env(rank, seed=0):
     def _init():
-        env = GameBoyEnv('rom\\PokemonRed.gb', window='null')
+        rom_file_path = os.path.join('rom', 'PokemonRed.gb')
+        env = GameBoyEnv(rom_file_path, window='null')
         env.reset(seed=(seed + rank))
         env = StreamWrapper(
             env, 
