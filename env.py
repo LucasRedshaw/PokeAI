@@ -24,18 +24,32 @@ class GameBoyEnv(gym.Env):
         super(GameBoyEnv, self).__init__()
         self.pyboy = PyBoy(game_rom, window=window)
         self.action_space = spaces.Discrete(actions)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
+        #self.observation_space = spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8)
+        self.observation_space = gym.spaces.Dict({
+            'image': gym.spaces.Box(low=0, high=255, shape=(72, 80, 3), dtype=np.uint8),
+            'health': gym.spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32),
+            'badges': gym.spaces.Box(low=0, high=8, shape=(1,), dtype=np.float32),
+            'levels': gym.spaces.Box(low=0, high=600, shape=(1,), dtype=np.float32)
+        })
         self.resetvars()
         self.resetinitvars()
         self.csv_file_path = 'run_stats.csv'
         self.initialize_csv()
 
     def step(self, action):
+
         self.current_step += 1
         self.totalstepsinrun += 1
         self.take_action(action)
         self.pyboy.tick(ticksperstep)
+        
         observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
+        observationhealth = np.array([self.healthtracker], dtype=np.float32) 
+        observationbadges = np.array([self.badges], dtype=np.float32)
+        observationlevels = np.array([self.pokelvlsum], dtype=np.float32)
+
+        obs = {'image': observation, 'health': observationhealth, 'badges': observationbadges, 'levels': observationlevels}
+
         reward, exploration_reward, level_reward, heal_reward, faint_reward, battle_reward, badge_reward, checkpoint_reward = calc_reward.calc_reward(self)
         self.explorationrewardtotal += exploration_reward
         self.levelrewardtotal += level_reward
@@ -60,20 +74,27 @@ class GameBoyEnv(gym.Env):
             done = False
         truncated = False
         info = {}
-        return observation, reward, done, truncated, info
+        return obs, reward, done, truncated, info
 
     def reset(self, seed=None, options=None):
         state_file_path = os.path.join('states', 'state_file.state')
         with open(state_file_path, "rb") as f:
             self.pyboy.load_state(f)
-        observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
-        info = {}
-        self.write_stats_to_csv()
 
-        print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str((self.resetssurvived*ep_length)+ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
+        observation = np.array(self.pyboy.screen.ndarray)[:, :, :3][::2, ::2]
+        observationhealth = np.array([self.healthtracker], dtype=np.float32) 
+        observationbadges = np.array([self.badges], dtype=np.float32)
+        observationlevels = np.array([self.pokelvlsum], dtype=np.float32)
+
+        obs = {'image': observation, 'health': observationhealth, 'badges': observationbadges, 'levels': observationlevels}
+
+        info = {}
+        # self.write_stats_to_csv()
+
+        # print("-----------------\nAgent reset with total reward: " + str(self.truetotal) + "\nResets survived: " + str(self.resetssurvived) + "\nTotal steps: " + str((self.resetssurvived*ep_length)+ep_length) + "\nLevel reward:  " + str(self.levelrewardtotal) + "\nExploration reward:  " + str(self.explorationrewardtotal)+"\n-----------------")
         
         self.resetvars()
-        return observation, info
+        return obs, info
 
     def take_action(self, action):
         if action == 0:
@@ -102,9 +123,11 @@ class GameBoyEnv(gym.Env):
         self.seen_checkpoints = set()
         self.seen_checkpoints.add(0)
         self.seen_maps.add(40)
+        self.healthtracker = 0
         self.max_steps = ep_length
         self.current_step = 0
         self.pokelvlsumtrack = 6
+        self.pokelvlsum = 0
         self.hpold = 0
         self.badges = 0
         self.mapid = 0

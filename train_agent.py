@@ -63,18 +63,16 @@ if __name__ == '__main__':
         model = PPO.load(
             checkpoint_path, 
             env, 
-            verbose=verbose, 
             n_steps=ep_length // nstepdivisor, 
             batch_size=batchsize, 
             n_epochs=epochs, 
             gamma=gamma, 
-            tensorboard_log=log_dir, 
             ent_coef=ent_coef
             )
     else:
         print("new model")
         model = PPO(
-            policy='CnnPolicy',
+            policy='MultiInputPolicy',
             env=env,
             verbose=verbose,
             n_steps=ep_length // nstepdivisor,

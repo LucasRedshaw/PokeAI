@@ -49,7 +49,7 @@ def calc_faint_reward(GameBoyEnv):
     faint_reward = 0
     if hptracker == 0:
         if GameBoyEnv.wait1 == 0:
-            print("Fainted")
+            #print("Fainted")
             faint_reward = faintvalue
             GameBoyEnv.wait1 = 1
     else:
@@ -61,10 +61,11 @@ def calc_heal_reward(GameBoyEnv):
     hptrack, hpcurrent, hpmax = memory_helper.get_hp(GameBoyEnv)
     pokemon_centers = memory_helper.pokemon_centers
     heal_reward = 0
+    GameBoyEnv.healthtracker = hptrack
     if mapid in pokemon_centers and hpcurrent > GameBoyEnv.hpold:
         heal_reward = healvalue * (hpmax - GameBoyEnv.hpold)
         GameBoyEnv.hpold = hpcurrent
-        print("Healed at ", pokemon_centers[mapid])
+        #print("Healed at ", pokemon_centers[mapid])
     else:
         GameBoyEnv.hpold = hpcurrent
     return heal_reward
@@ -85,8 +86,8 @@ def calc_exploration_reward(GameBoyEnv):
 
     if coords not in GameBoyEnv.seen_coords:
         if mapid not in GameBoyEnv.seen_maps:
-            if mapid in memory_helper.locations:
-                print(memory_helper.locations[mapid])
+            # if mapid in memory_helper.locations:
+            #     print(memory_helper.locations[mapid])
             GameBoyEnv.seen_maps.add(mapid)
         exploration_reward = coordvalue
         GameBoyEnv.seen_coords.add(coords)
@@ -95,6 +96,7 @@ def calc_exploration_reward(GameBoyEnv):
 
 def calc_level_reward(GameBoyEnv):
     pokelvlsum = memory_helper.get_level_sum(GameBoyEnv)
+    GameBoyEnv.pokelvlsum = pokelvlsum
     level_rewards = 0
     if pokelvlsum > GameBoyEnv.pokelvlsumtrack:
         level_rewards = lvlvalue*(pokelvlsum - GameBoyEnv.pokelvlsumtrack)
